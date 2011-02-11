@@ -31,6 +31,9 @@ module Johnson
           script.gsub!("parent.value = parent.options[0].value;", "parent.value = parent.options[0].value; }")
           # make sure the first select option is selected by default
           script.gsub!("get selectedIndex(){", "get selectedIndex() { var options = this.options; for(var i=0;i<options.length;i++){ if(options[i].selected){ return i; } } if (options.length > 0) { options[0].selected = true; return 0; } return -1;")
+          # performance improvement when selecting an option
+          script.gsub!("parent && (parent.value = this.value);", "if (parent) { parent.performance_gain_for_select = true; parent.value = this.value; parent.performance_gain_for_select = false; }")
+          script.gsub!("var i, anythingSelected;", "var i, anythingSelected; if (parent && parent.performance_gain_for_select) { return; }");
         end
         compile_without_fixes(script, filename, linenum, global)
       end
